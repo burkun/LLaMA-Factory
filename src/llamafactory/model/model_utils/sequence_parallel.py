@@ -9,7 +9,7 @@ import transformers.modeling_flash_attention_utils
 from ring_flash_attn import zigzag_ring_flash_attn_func
 from yunchang import UlyssesAttention
 from yunchang.kernels import AttnType
-from packaging import version
+from ...extras.packages import is_transformers_version_greater_than
 
 
 def new_flash_attn_forward(
@@ -73,9 +73,7 @@ def apply_sequence_parallel(model_args, full_determinism=False):
         # monkey patching
         # transformers<=4.47.1
         transformers.modeling_flash_attention_utils._flash_attention_forward = new_flash_attention_forward
-        current_version = version.parse(transformers.__version__)
-        min_version = version.parse("4.48.0")
-        if current_version >= min_version:
+        if is_transformers_version_greater_than("4.48.0"):
             # transformers>=4.48.0
             transformers.integrations.flash_attention._flash_attention_forward = new_flash_attention_forward
     except Exception:
